@@ -1,6 +1,5 @@
 package au.com.helixta.spannerexamples.cats;
 
-import com.google.cloud.spanner.DatabaseId;
 import com.google.cloud.spanner.SpannerOptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,16 +16,15 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.sql.SQLException;
 
+import static au.com.helixta.spannerexamples.TestConfig.*;
+
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = TestSpanner.AppConfiguration.class)
 class TestSpanner
 {
     private static final Logger log = LoggerFactory.getLogger(TestSpanner.class);
 
-    private static final DatabaseId DATABASE_ID = DatabaseId.of("helix-sydney", "prunge-test", "cats");
-    private static final String JDBC_URI = "jdbc:cloudspanner:/" + DATABASE_ID.getName();
     private static final SpannerSql spannerSql = new SpannerSql(JDBC_URI);
-
     private static final SpannerMutations spannerMutations = new SpannerMutations(SpannerOptions.getDefaultInstance().getService(),
                                                                                   DATABASE_ID);
     @Autowired
