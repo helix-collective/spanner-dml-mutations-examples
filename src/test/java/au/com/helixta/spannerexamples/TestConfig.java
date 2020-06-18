@@ -11,9 +11,9 @@ public final class TestConfig
 
     static
     {
-        String projectId = System.getProperty("test.projectId", "helix-sydney");
-        String instanceId = System.getProperty("test.instanceId", "prunge-test");
-        String databaseId = System.getProperty("test.databaseId", "cats");
+        String projectId = getProperty("test.projectId", "helix-sydney");
+        String instanceId = getProperty("test.instanceId", "test");
+        String databaseId = getProperty("test.databaseId", "test");
         DATABASE_ID = DatabaseId.of(projectId, instanceId, databaseId);
     }
 
@@ -21,5 +21,16 @@ public final class TestConfig
 
     private TestConfig()
     {
+    }
+
+    private static String getProperty(String name, String defaultValue)
+    {
+        String value = System.getProperty(name);
+        if (value != null && value.trim().isEmpty())
+            value = null;
+        if (value == null)
+            value = defaultValue;
+
+        return value;
     }
 }
