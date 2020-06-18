@@ -1,4 +1,4 @@
-package au.com.helixta.spannerexamples;
+package au.com.helixta.spannerexamples.cats;
 
 import com.google.cloud.spanner.DatabaseClient;
 import com.google.cloud.spanner.DatabaseId;

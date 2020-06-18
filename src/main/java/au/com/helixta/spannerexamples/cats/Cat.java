@@ -1,4 +1,4 @@
-package au.com.helixta.spannerexamples;
+package au.com.helixta.spannerexamples.cats;
 
 import org.springframework.cloud.gcp.data.spanner.core.mapping.Column;
 import org.springframework.cloud.gcp.data.spanner.core.mapping.PrimaryKey;

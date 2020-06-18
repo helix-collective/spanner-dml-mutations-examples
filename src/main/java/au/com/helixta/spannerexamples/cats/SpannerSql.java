@@ -1,4 +1,4 @@
-package au.com.helixta.spannerexamples;
+package au.com.helixta.spannerexamples.cats;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
