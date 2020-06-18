@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.gcp.data.spanner.core.admin.DatabaseIdProvider;
 import org.springframework.cloud.gcp.data.spanner.repository.config.EnableSpannerRepositories;
@@ -26,6 +27,8 @@ class TestSpanner
     private static final SpannerSql spannerSql = new SpannerSql(JDBC_URI);
     private static final SpannerMutations spannerMutations = new SpannerMutations(SpannerOptions.getDefaultInstance().getService(),
                                                                                   DATABASE_ID);
+    @Autowired
+    private SpannerSpringData spannerSpringData;
 
     @BeforeEach
     void setUpDatabase()
@@ -49,14 +52,12 @@ class TestSpanner
         spannerMutations.run();
     }
 
-    /*
     @Test
     void testSpringData()
     {
         log.info("Spring Data test:");
         spannerSpringData.run();
     }
-    */
 
     @SpringBootApplication
     @EnableSpannerRepositories
