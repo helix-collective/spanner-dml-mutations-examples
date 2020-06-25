@@ -49,6 +49,12 @@
                     <installDirectory>target</installDirectory>
                     <nodeVersion>${node.version}</nodeVersion>
                     <npmVersion>${npm.version}</npmVersion>
+
+                    <environmentVariables>
+                        <TEST_PROJECT_ID>${test.projectId}</TEST_PROJECT_ID>
+                        <TEST_INSTANCE_ID>${test.instanceId}</TEST_INSTANCE_ID>
+                        <TEST_DATABASE_ID>${test.databaseId}</TEST_DATABASE_ID>
+                    </environmentVariables>
                 </configuration>
                 <executions>
                     <execution>

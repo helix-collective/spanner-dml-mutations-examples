@@ -1,9 +1,9 @@
 import { doSpannerDml, doSpannerMutations, doSpannerSetup } from './index';
 import { Spanner } from '@google-cloud/spanner';
 
-const spanner = new Spanner({projectId: 'helix-sydney'});
-const instance = spanner.instance('prunge-test');
-const db = instance.database('cats');
+const spanner = new Spanner({projectId: process.env.TEST_PROJECT_ID || 'helix-sydney'});
+const instance = spanner.instance(process.env.TEST_INSTANCE_ID || 'test');
+const db = instance.database(process.env.TEST_DATABASE_ID || 'test');
 
 beforeEach(async () => {
   await doSpannerSetup(db);
