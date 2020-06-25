@@ -1,0 +1,31 @@
+{
+  "name": "spanner-dml-mutations-typescript",
+  "version": "0.1.0",
+  "private": true,
+  "main": "build/lib/components/index.js",
+  "types": "build/lib/components/index.d.ts",
+  "dependencies": {
+    "@google-cloud/precise-date": "^1.0.0",
+    "@google-cloud/spanner": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^24.0.18",
+    "@types/node": "12.7.5",
+    "jest": "^24.9.0",
+    "ts-jest": "^24.1.0",
+    "typescript": "^3.7.3"
+  },
+  "scripts": {
+    "build-lib": "tsc",
+    "build-watch": "tsc -w",
+    "test": "jest"
+  },
+  "files": [
+    "build/lib"
+  ],
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "testTimeout": 500000
+  }
+}

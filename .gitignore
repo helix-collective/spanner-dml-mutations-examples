@@ -2,3 +2,6 @@
 /java/target/
 /spanner-dml-mutations-parent.iml
 /java/spanner-dml-mutations.iml
+/typescript/node_modules
+/typescript/spanner-dml-mutations-typescript.iml
+/typescript/target
