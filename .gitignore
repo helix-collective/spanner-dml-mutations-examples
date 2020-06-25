@@ -1,3 +1,4 @@
 /.idea/
-/target/
-/spanner-dml-mutations.iml
+/java/target/
+/spanner-dml-mutations-parent.iml
+/java/spanner-dml-mutations.iml
