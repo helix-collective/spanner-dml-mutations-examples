@@ -1,4 +1,4 @@
-import { doSpannerDml, doSpannerMutations, doSpannerSetup } from './index';
+import { doSpannerDml, doSpannerMutations, doSpannerSetup } from './cats';
 import { Spanner } from '@google-cloud/spanner';
 
 const spanner = new Spanner({projectId: process.env.TEST_PROJECT_ID || 'helix-sydney'});
