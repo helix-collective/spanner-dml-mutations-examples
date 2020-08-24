@@ -1,4 +1,5 @@
-    <project><modelVersion>4.0.0</modelVersion>
+<project>
+    <modelVersion>4.0.0</modelVersion>
   
     <groupId>au.com.helixta.spanner-examples</groupId>
     <artifactId>spanner-dml-mutations</artifactId>
@@ -7,7 +8,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <jdk.version>13</jdk.version>
+        <jdk.version>14</jdk.version>
     </properties>
 
     <dependencyManagement>
@@ -29,14 +30,14 @@
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-framework-bom</artifactId>
-                <version>5.2.7.RELEASE</version>
+                <version>5.2.8.RELEASE</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>2.3.1.RELEASE</version>
+                <version>2.3.2.RELEASE</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -47,13 +48,13 @@
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-spanner-jdbc</artifactId>
-            <version>1.15.0</version>
+            <version>1.16.0</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-gcp-starter-data-spanner</artifactId>
-            <version>1.2.3.RELEASE</version>
+            <version>1.2.4.RELEASE</version>
         </dependency>
 
         <dependency>
@@ -64,7 +65,7 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <version>3.16.1</version>
+            <version>3.17.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -87,16 +88,65 @@
                 </configuration>
             </plugin>
             <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.33.0</version>
+                <configuration>
+                    <images>
+                        <image>
+                            <alias>spanner-emulator</alias>
+                            <name>gcr.io/cloud-spanner-emulator/emulator:1.0.0</name>
+                            <run>
+                                <ports>
+                                    <port>+spanner.emulator.host:spanner.emulator.port:9010</port>
+                                    <port>9020</port>
+                                </ports>
+                                <wait>
+                                    <tcp>
+                                        <ports>
+                                            <port>9010</port>
+                                        </ports>
+                                    </tcp>
+                                </wait>
+                            </run>
+                        </image>
+                    </images>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>start-spanner-emulator</id>
+                        <goals>
+                            <goal>start</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>stop-spanner-emulator</id>
+                        <goals>
+                            <goal>stop</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-failsafe-plugin</artifactId>
                 <version>2.22.2</version>
                 <configuration>
                     <!-- Also GOOGLE_APPLICATION_CREDENTIALS environment variable can be set to a JSON file containing credentials -->
                     <systemPropertyVariables>
+                        <test.spanner.emulator>${spanner.emulator.host}:${spanner.emulator.port}</test.spanner.emulator>
                         <test.projectId>${test.projectId}</test.projectId>
                         <test.instanceId>${test.instanceId}</test.instanceId>
                         <test.databaseId>${test.databaseId}</test.databaseId>
                     </systemPropertyVariables>
                 </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
