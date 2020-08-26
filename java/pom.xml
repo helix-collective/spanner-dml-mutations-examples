@@ -1,76 +1,30 @@
 <project>
     <modelVersion>4.0.0</modelVersion>
-  
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.3.2.RELEASE</version>
+        <relativePath /> <!-- lookup parent from repository -->
+    </parent>
+
     <groupId>au.com.helixta.spanner-examples</groupId>
-    <artifactId>spanner-dml-mutations</artifactId>
+    <artifactId>spanner-emulator-spring-sample</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <jdk.version>14</jdk.version>
+        <java.version>11</java.version>
     </properties>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.junit</groupId>
-                <artifactId>junit-bom</artifactId>
-                <version>5.6.2</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-             <dependency>
-                <groupId>com.google.guava</groupId>
-                <artifactId>guava-bom</artifactId>
-                <version>29.0-jre</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-framework-bom</artifactId>
-                <version>5.2.8.RELEASE</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>2.3.2.RELEASE</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>  
-
     <dependencies>
-        <dependency>
-            <groupId>com.google.cloud</groupId>
-            <artifactId>google-cloud-spanner-jdbc</artifactId>
-            <version>1.16.0</version>
-        </dependency>
-
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-gcp-starter-data-spanner</artifactId>
             <version>1.2.4.RELEASE</version>
         </dependency>
-
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <version>3.17.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -78,62 +32,9 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
-                <configuration>
-                    <release>${jdk.version}</release>
-                    <source>${jdk.version}</source>
-                    <target>${jdk.version}</target>
-                    <parameters>true</parameters>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>io.fabric8</groupId>
-                <artifactId>docker-maven-plugin</artifactId>
-                <version>0.33.0</version>
-                <configuration>
-                    <images>
-                        <image>
-                            <alias>spanner-emulator</alias>
-                            <name>gcr.io/cloud-spanner-emulator/emulator:1.0.0</name>
-                            <run>
-                                <ports>
-                                    <port>+spanner.emulator.host:spanner.emulator.port:9010</port>
-                                    <port>9020</port>
-                                </ports>
-                                <wait>
-                                    <tcp>
-                                        <ports>
-                                            <port>9010</port>
-                                        </ports>
-                                    </tcp>
-                                </wait>
-                            </run>
-                        </image>
-                    </images>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>start-spanner-emulator</id>
-                        <goals>
-                            <goal>start</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>stop-spanner-emulator</id>
-                        <goals>
-                            <goal>stop</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.22.2</version>
                 <configuration>
-                    <!-- Also GOOGLE_APPLICATION_CREDENTIALS environment variable can be set to a JSON file containing credentials -->
                     <systemPropertyVariables>
-                        <test.spanner.emulator>${spanner.emulator.host}:${spanner.emulator.port}</test.spanner.emulator>
                         <test.projectId>${test.projectId}</test.projectId>
                         <test.instanceId>${test.instanceId}</test.instanceId>
                         <test.databaseId>${test.databaseId}</test.databaseId>
@@ -150,4 +51,67 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>use-spanner-emulator</id>
+            <activation>
+                <property>
+                    <name>!test.projectId</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.fabric8</groupId>
+                        <artifactId>docker-maven-plugin</artifactId>
+                        <version>0.33.0</version>
+                        <configuration>
+                            <images>
+                                <image>
+                                    <alias>spanner-emulator</alias>
+                                    <name>gcr.io/cloud-spanner-emulator/emulator:1.0.0</name>
+                                    <run>
+                                        <ports>
+                                            <port>+spanner.emulator.host:spanner.emulator.port:9010</port>
+                                        </ports>
+                                        <wait>
+                                            <tcp>
+                                                <ports>
+                                                    <port>9010</port>
+                                                </ports>
+                                            </tcp>
+                                        </wait>
+                                    </run>
+                                </image>
+                            </images>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>start-spanner-emulator</id>
+                                <goals>
+                                    <goal>start</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>stop-spanner-emulator</id>
+                                <goals>
+                                    <goal>stop</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <configuration>
+                            <environmentVariables>
+                                <SPANNER_EMULATOR_HOST>${spanner.emulator.host}:${spanner.emulator.port}</SPANNER_EMULATOR_HOST>
+                            </environmentVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
