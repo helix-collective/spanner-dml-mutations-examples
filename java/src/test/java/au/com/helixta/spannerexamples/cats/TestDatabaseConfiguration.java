@@ -1,6 +1,8 @@
 package au.com.helixta.spannerexamples.cats;
 
+import com.google.cloud.spanner.Database;
 import com.google.cloud.spanner.DatabaseId;
+import com.google.cloud.spanner.DatabaseNotFoundException;
 import com.google.cloud.spanner.Instance;
 import com.google.cloud.spanner.InstanceAdminClient;
 import com.google.cloud.spanner.InstanceConfig;
@@ -30,44 +32,58 @@ public class TestDatabaseConfiguration
         String instanceProperty = getProperty("test.instanceId", "test-instance");
         String databaseProperty = getProperty("test.databaseId", "cats");
         String emulatorHost = System.getenv("SPANNER_EMULATOR_HOST");
-        if (emulatorHost != null)
+
+        try (Spanner spanner = SpannerOptions.newBuilder().setEmulatorHost(emulatorHost).setProjectId(projectProperty).build().getService())
         {
-            try (Spanner spanner = SpannerOptions.newBuilder().setEmulatorHost(emulatorHost).build().getService())
+            InstanceAdminClient instanceAdminClient = spanner.getInstanceAdminClient();
+            Instance instance;
+
+            if (emulatorHost != null)
             {
                 //Detect instance config/project to use with the emulator
-                InstanceAdminClient instanceAdminClient = spanner.getInstanceAdminClient();
                 InstanceConfig instanceConfig = instanceAdminClient.listInstanceConfigs().iterateAll().iterator()
                                                                    .next();
                 projectProperty = instanceConfig.getId().getProject();
 
                 //Delete and recreate new instance in emulator
                 instanceAdminClient.deleteInstance(instanceProperty);
-                Instance instance = instanceAdminClient.createInstance(InstanceInfo.newBuilder(
-                        InstanceId.of(instanceConfig.getId().getProject(), instanceProperty))
-                                                                                   .setInstanceConfigId(
-                                                                                           instanceConfig.getId())
-                                                                                   .build()).get();
-
-                //Recreate database
-                List<String> dbCreateStatements = List.of(
-                        "create table Owners (\n" +
-                                "  OwnerId INT64 NOT NULL,\n" +
-                                "  OwnerName STRING(MAX) NOT NULL\n" +
-                                ") PRIMARY KEY (OwnerId)",
-
-                        "create table Cats (\n" +
-                                "  CatId INT64 NOT NULL,\n" +
-                                "  OwnerId INT64 NOT NULL,\n" +
-                                "  CatName String(MAX) NOT NULL\n" +
-                                ") PRIMARY KEY (OwnerId, CatId),\n" +
-                                "  INTERLEAVE IN PARENT Owners ON DELETE CASCADE"
-                );
-                instance.createDatabase(databaseProperty, dbCreateStatements).get();
+                instance = instanceAdminClient.createInstance(InstanceInfo.newBuilder(
+                        InstanceId.of(projectProperty, instanceProperty))
+                                           .setInstanceConfigId(instanceConfig.getId())
+                                           .build()).get();
             }
-            catch (InterruptedException | ExecutionException e)
+            else
+                instance = instanceAdminClient.getInstance(instanceProperty);
+
+            //Recreate database
+            try
             {
-                throw new RuntimeException(e);
+                Database database = instance.getDatabase(databaseProperty);
+                database.drop();
             }
+            catch (DatabaseNotFoundException e)
+            {
+                //Ignore, want to delete anyway
+            }
+
+            List<String> dbCreateStatements = List.of(
+                    "create table Owners (\n" +
+                            "  OwnerId INT64 NOT NULL,\n" +
+                            "  OwnerName STRING(MAX) NOT NULL\n" +
+                            ") PRIMARY KEY (OwnerId)",
+
+                    "create table Cats (\n" +
+                            "  CatId INT64 NOT NULL,\n" +
+                            "  OwnerId INT64 NOT NULL,\n" +
+                            "  CatName String(MAX) NOT NULL\n" +
+                            ") PRIMARY KEY (OwnerId, CatId),\n" +
+                            "  INTERLEAVE IN PARENT Owners ON DELETE CASCADE"
+            );
+            instance.createDatabase(databaseProperty, dbCreateStatements).get();
+        }
+        catch (InterruptedException | ExecutionException e)
+        {
+            throw new RuntimeException(e);
         }
 
         DatabaseId databaseId = DatabaseId.of(projectProperty, instanceProperty, databaseProperty);
